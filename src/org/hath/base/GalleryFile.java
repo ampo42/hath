@@ -112,10 +112,11 @@ public class GalleryFile {
 		boolean validToken = tokentime > System.currentTimeMillis() - 3600000;		
 		File fromfile = hvfile.getLocalFileRef();
 		
+		GalleryFileDownloader gfd = null;
 		// try to download if it doesn't exist and we have a token
 		if(validToken && !fromfile.isFile()) {
 			Out.debug("Downloader: " + tofile + " - initializing GalleryFileDownloader");
-			GalleryFileDownloader gfd = new GalleryFileDownloader(client, fileid, token, gid, page, filename);
+			gfd = new GalleryFileDownloader(client, fileid, token, gid, page, filename);
 			gfd.initialize();
 			
 			int sleepTime = 1000;
@@ -139,9 +140,15 @@ public class GalleryFile {
 		} else if(!validToken) {
 			// we need a token for this file before we can download it
 			return FILE_INVALID_TOKEN;
+		// we don't really need to test gfd!=null here
+		}else if(gfd!=null && gfd.getDownloadState()==GalleryFileDownloader.DOWNLOAD_COMPLETE_UNCACHED ){
+			// file is uncached, so we need to move it from the tmp directory.
+			if (FileTools.move(gfd.getTmpFile(), tofile))
+				return FILE_SUCCESS;
+			else
+				return FILE_PERMFAIL;
 		} else {
 			// download was attempted but failed - flag necessary conditions for retry
-			
 			lastretry = System.currentTimeMillis();
 		
 			if(++retrycount > 10) {

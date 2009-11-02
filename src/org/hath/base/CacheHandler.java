@@ -181,7 +181,7 @@ public class CacheHandler {
 	// note: this will just move the file into its correct location. addFileToActiveCache MUST be called afterwards to import the file into the necessary datastructures.
 	// otherwise, the file will not be available until the client is restarted, and even then not if --quickstart is used.
 	public boolean moveFileToCacheDir(File file, HVFile hvFile) {
-		if(hvFile.getSize() > 1024*1024) {
+		if(hvFile.getSize() > Settings.CACHE_MAX_FILESIZE) {
 			Out.warning("CacheHandler: File " + file + " is too large to cache.");
 		}
 		else if(checkAndFreeDiskSpace(file)) {
