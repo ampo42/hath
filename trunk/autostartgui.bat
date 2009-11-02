@@ -1,1 +1,1 @@
-@start javaw -jar HentaiAtHomeGUI.jar --completed-dir=completed
+@start javaw -jar HentaiAtHomeGUI.jar
