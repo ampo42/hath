@@ -34,12 +34,14 @@ import java.net.URLConnection;
 public class GalleryFileDownloader implements Runnable {
 	public static final int DOWNLOAD_PENDING = 0;
 	public static final int DOWNLOAD_COMPLETE = 1;
+	public static final int DOWNLOAD_COMPLETE_UNCACHED = 2;
 	public static final int DOWNLOAD_FAILED_INIT = -1;
 	public static final int DOWNLOAD_FAILED_CONN = -2;
 
 	private HentaiAtHomeClient client;
 
 	private HVFile requestedHVFile;
+	private File tmpFile;
 	private String fileid;
 	private String token;
 	private int gid;
@@ -214,10 +216,10 @@ public class GalleryFileDownloader implements Runnable {
 		} else {
 			try {
 				CacheHandler cacheHandler = client.getCacheHandler();
-				File tmpfile = File.createTempFile("hathproxy_", "", cacheHandler.getTmpDir());
-				FileTools.putFileContents(tmpfile, databuffer);
+				tmpFile = File.createTempFile("hathproxy_", "", cacheHandler.getTmpDir());
+				FileTools.putFileContents(tmpFile, databuffer);
 				
-				if(cacheHandler.moveFileToCacheDir(tmpfile, requestedHVFile)) {
+				if(cacheHandler.moveFileToCacheDir(tmpFile, requestedHVFile)) {
 					cacheHandler.addFileToActiveCache(requestedHVFile);
 					// During server-initiated file distributes and proxy tests against other clients, the file is automatically registered for this client by the server, but this doesn't happen during client-initiated H@H Downloader or H@H Proxy downloads.
 					// So we'll instead send regular updates to the server about downloaded files, whenever a file is added this way.
@@ -226,8 +228,14 @@ public class GalleryFileDownloader implements Runnable {
 					success = true;
 				}
 				else {
-					tmpfile.delete();
-					Out.debug("Requested file " + fileid + " somehow exists, and was dropped.");
+					// uncached because of size limit, we don't delete it yet
+					if(requestedHVFile.getSize()>Settings.CACHE_MAX_FILESIZE){
+						downloadState = DOWNLOAD_COMPLETE_UNCACHED;
+						return;
+					}else{
+						tmpFile.delete();
+						Out.debug("Requested file " + fileid + " somehow exists, and was dropped.");
+					}
 				}
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -259,5 +267,9 @@ public class GalleryFileDownloader implements Runnable {
 	
 	public byte[] getDownloadBufferRange(int readoff, int endoff) {
 		return Arrays.copyOfRange(databuffer, readoff, endoff);
+	}
+	
+	public File getTmpFile(){
+		return tmpFile;
 	}
 }

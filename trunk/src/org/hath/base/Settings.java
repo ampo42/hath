@@ -31,7 +31,7 @@ public class Settings {
 	
 	// the client build is among others used by the server to determine the client's capabilities. any forks should use the build number as an indication of compatibility with mainline, and not use it as an internal build number.
 	public static final int CLIENT_BUILD = 43;
-	public static final String CLIENT_VERSION = "1.0.1-bagdool.0";
+	public static final String CLIENT_VERSION = "1.0.1-bagdool.1";
 	
 	public static final String CLIENT_API_URL = "http://rpc.hentaiathome.net/clientapi.php?";
 	
@@ -41,6 +41,7 @@ public class Settings {
 	public static final int CLIENT_KEY_LENGTH = 20;
 	public static final int MAX_KEY_TIME_DRIFT = 300;
 	public static final int MAX_CONNECTION_BASE = 40;
+	public static final int CACHE_MAX_FILESIZE = 1024*1024;
 	
 	public static final String CONTENT_TYPE_DEFAULT = "text/html; charset=iso-8859-1";
 	public static final String CONTENT_TYPE_OCTET = "application/octet-stream";
